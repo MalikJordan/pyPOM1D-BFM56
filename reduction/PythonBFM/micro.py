@@ -1,17 +1,12 @@
-from contextlib import nullcontext
-import numpy as np
-# from pom.constants import num_boxes
-from bfm.bfm56.Functions.other_functions import eTq_vector, get_concentration_ratio
+from reduction.PythonBFM.other_functions import eTq_vector, get_concentration_ratio
 
-def microzoo_eqns(d3state, microzoo_parameters, constant_parameters, environmental_parameters, zc, zn, zp, i_c, i_n, i_p, temp):
+def microzoo_eqns(conc, microzoo_parameters, constant_parameters, environmental_parameters, zc, zn, zp, i_c, i_n, i_p, temp):
     """ Calculates the micorzooplankton (Z5 & Z6) terms needed for the zooplankton biological rate equations
         Equations come from the BFM user manual and the fortran code MicroZoo.F90
     """
 
-    num_boxes = d3state.shape[0]
-
     # Dissolved oxygen concentration (mg O_2 m^-3)
-    o2o = d3state[:,0]
+    o2o = conc[0]
     
     # Concentration ratios
     zn_zc = get_concentration_ratio(zn, zc, constant_parameters["p_small"])
@@ -21,9 +16,7 @@ def microzoo_eqns(d3state, microzoo_parameters, constant_parameters, environment
     fTZ = eTq_vector(temp, environmental_parameters["basetemp"], environmental_parameters["q10z"])
     
     # Oxygen dependent regulation factor (eO2)
-    fZO = np.zeros(num_boxes)
-    for i in range(0,num_boxes):
-        fZO[i] = min(1.0, (o2o[i]/(o2o[i] + microzoo_parameters["z_o2o"])))
+    fZO = min(1.0, (o2o/(o2o + microzoo_parameters["z_o2o"])))
     
     #---------------------- Microzooplankton Respiration ----------------------
     # Zooplankton total repiration rate (eqn. 2.4.8, and matches fortran code)
@@ -52,25 +45,18 @@ def microzoo_eqns(d3state, microzoo_parameters, constant_parameters, environment
 
     #--------------- Microzooplankton Dissolved nutrient dynamics -------------     
     # Equations from fortran code (MicroZoo.F90 line 368-371)
-    runc = np.zeros(num_boxes)
-    runn = np.zeros(num_boxes)
-    runp = np.zeros(num_boxes)
-    dZpdt_rel_n1p = np.zeros(num_boxes)
-    dZndt_rel_n4n = np.zeros(num_boxes)
-    # zn_zc[:] = 0.01258
-    x = np.zeros(num_boxes)
-    y = np.zeros(num_boxes)
-    for i in range(0,num_boxes):
-        runc[i] = max(0.0, i_c[i]*(1.0 - microzoo_parameters["betaZ"])-rrac[i])
-        runn[i] = max(0.0, i_n[i]*(1.0 - microzoo_parameters["betaZ"]) + rrsc[i]*zn_zc[i])
-        runp[i] = max(0.0, i_p[i]*(1.0 - microzoo_parameters["betaZ"]) + rrsc[i]*zp_zc[i])
-        # x[i] = runn[i]/(constant_parameters["p_small"] + runc[i]) - microzoo_parameters["n_Zopt"]
-        # dZpdt_rel_n1p[i] = max(0.0, runp[i]/(constant_parameters["p_small"] + runc[i]) - microzoo_parameters["p_Zopt"])*runc[i]   # MicroZoo.F90, rep
-        # dZndt_rel_n4n[i] = max(0.0, runn[i]/(constant_parameters["p_small"] + runc[i]) - microzoo_parameters["n_Zopt"])*runc[i]   # MicroZoo.F90, ren
-        # dZpdt_rel_n1p[i] = max(0.0, runp[i]/(constant_parameters["p_small"] + runc[i]) - zp_zc[i])*runc[i]   # MicroZoo.F90, rep
-        dZpdt_rel_n1p[i] = max(0.0, runp[i]/(constant_parameters["p_small"] + runc[i]) - 0.0007862)*runc[i]   # MicroZoo.F90, rep
-        # dZndt_rel_n4n[i] = max(0.0, runn[i]/(constant_parameters["p_small"] + runc[i]) - zn_zc[i])*runc[i]   # MicroZoo.F90, ren
-        dZndt_rel_n4n[i] = max(0.0, runn[i]/(constant_parameters["p_small"] + runc[i]) - 0.01258)*runc[i]   # MicroZoo.F90, ren
+    runc = 0.
+    runn = 0.
+    runp = 0.
+    dZpdt_rel_n1p = 0.
+    dZndt_rel_n4n = 0.
+
+    runc = max(0.0, i_c*(1.0 - microzoo_parameters["betaZ"])-rrac)
+    runn = max(0.0, i_n*(1.0 - microzoo_parameters["betaZ"]) + rrsc*zn_zc)
+    runp = max(0.0, i_p*(1.0 - microzoo_parameters["betaZ"]) + rrsc*zp_zc)
+    
+    dZpdt_rel_n1p = max(0.0, runp/(constant_parameters["p_small"] + runc) - 0.0007862)*runc   # MicroZoo.F90, rep
+    dZndt_rel_n4n = max(0.0, runn/(constant_parameters["p_small"] + runc) - 0.01258)*runc   # MicroZoo.F90, ren
 
     return dZcdt_rel_r1c, dZcdt_rel_r6c, dZcdt_rsp_o3c, dZndt_rel_r1n, dZndt_rel_r6n, dZpdt_rel_r1p, dZpdt_rel_r6p, dZpdt_rel_n1p, dZndt_rel_n4n
     

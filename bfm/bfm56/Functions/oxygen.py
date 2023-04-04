@@ -1,11 +1,13 @@
 import numpy as np
-from pom.constants import num_boxes
+# from pom.constants import num_boxes
 
 def calculate_oxygen_reaeration(oxygen_reaeration_parameters, environmental_parameters, constant_parameters, d3state, del_z, temper, salt, wind):
     """ calculates the oxygen reaeration between air and water column, 
     as forced by temperature and wind.
     """
     
+    num_boxes = d3state.shape[0]
+
     # State variables
     o2o = d3state[:,0]              # Dissolved oxygen (mg O_2 m^-3)
     

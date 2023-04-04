@@ -1,6 +1,8 @@
+import os
 from inputs import params_POMBFM
 
-current_path = '/Users/malikjordan/Documents/GitHub/pyPOM1D-BFM56'
+# current_path = '/Users/malikjordan/Documents/GitHub/pyPOM1D-BFM56'
+current_path = os.getcwd()
 seconds_per_day = 86400.
 earth_angular_velocity = 7.29E-5                                                        # OMEGA
 vertical_layers = 151

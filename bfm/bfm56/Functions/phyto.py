@@ -1,14 +1,26 @@
 import numpy as np
 import sys
+import json
 from bfm.bfm56.Functions.other_functions import insw_vector, eTq_vector, get_concentration_ratio
-from pom.constants import seconds_per_day, num_boxes
+# from pom.constants import current_path, seconds_per_day, num_boxes
+from pom.constants import current_path, seconds_per_day
 from pom_bfm_coupling.calculations import phyto_sedimentation
+
+with open(current_path + "/bfm/bfm56/bfm56_parameters.json") as read_parameters:
+        parameters = json.load(read_parameters)
+    
+phyto1_prameters = parameters["phyto1_parameters"]
+phyto2_prameters = parameters["phyto2_parameters"]
+phyto3_prameters = parameters["phyto3_parameters"]
+phyto4_prameters = parameters["phyto4_parameters"]
 
 # def phyto_eqns(conc, phyto_parameters, env_parameters, constant_parameters, group, pc, pn, pp, pl, qs, suspended_sediments, temp, time):
 def phyto_eqns(d3state, bfm_phys_vars, phyto_parameters, env_parameters, constant_parameters, del_z, group, irradiance, pc, pn, pp, pl, suspended_sediments, temp, time, xEPS):
     """ Calculates the terms needed for the phytoplnaktion biological rate equations
         Equations come from the BFM user manual
     """
+
+    num_boxes = d3state.shape[0]
 
     # Species concentrations
     n1p = d3state[:,1]               # Phosphate (mmol P m^-3)
@@ -310,15 +322,26 @@ def phyto_eqns(d3state, bfm_phys_vars, phyto_parameters, env_parameters, constan
             dPldt_syn, dPsdt_upt_n5s, dPsdt_lys_r6s, bfm_phys_vars)
 
 
-def calc_chla(d3state):
+def calc_chla(d3state,multiplier):
     
-    p1l = d3state[:,13]             # Diatoms chlorophyll (mg Chl-a m^-3)
-    p2l = d3state[:,18]             # NanoFlagellates chlorophyll (mg Chl-a m^-3)
-    p3l = d3state[:,22]             # Picophytoplankton chlorophyll (mg Chl-a m^-3)
-    p4l = d3state[:,26]             # Large phytoplankton chlorophyll (mg Chl-a m^-3)
+    if multiplier[13] == 0:     # Diatoms chlorophyll (mg Chl-a m^-3)
+        p1l = phyto1_prameters['theta_chl0'] * d3state[:,10]
+    else:
+        p1l = d3state[:,13]          
+    if multiplier[18] == 0:     # NanoFlagellates chlorophyll (mg Chl-a m^-3)
+        p2l = phyto2_prameters['theta_chl0'] * d3state[:,14]
+    else:
+        p2l = d3state[:,18]
+    if multiplier[22] == 0:     # Picophytoplankton chlorophyll (mg Chl-a m^-3)
+        p3l = phyto3_prameters['theta_chl0'] * d3state[:,19]
+    else:
+        p3l = d3state[:,22]
+    if multiplier[26] == 0:     # Large phytoplankton chlorophyll (mg Chl-a m^-3)
+        p4l = phyto4_prameters['theta_chl0'] * d3state[:,23]
+    else:
+        p4l = d3state[:,26]             
     
     # From CalcChlorophylla.F90 (ChlDynamicsFlag = 2)
     chla = p1l + p2l + p3l + p4l
-    # chla = p2l
 
     return chla

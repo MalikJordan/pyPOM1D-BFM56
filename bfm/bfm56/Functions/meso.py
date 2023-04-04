@@ -1,5 +1,5 @@
 import numpy as np
-from pom.constants import num_boxes
+# from pom.constants import num_boxes
 from bfm.bfm56.Functions.other_functions import eTq_vector, get_concentration_ratio
 
 def mesozoo_eqns(d3state, mesozoo_parameters, constant_parameters, environmental_parameters, zc, zn, zp, i_c, i_n, i_p, temp):
@@ -7,6 +7,8 @@ def mesozoo_eqns(d3state, mesozoo_parameters, constant_parameters, environmental
         Equations come from the BFM user manual and the fortran code MesoZoo.F90
     """         
     
+    num_boxes = d3state.shape[0]
+
     # Dissolved oxygen concentration (mg O_2 m^-3)
     o2o = d3state[:,0]              # Dissolved oxygen (mg O_2 m^-3)
 

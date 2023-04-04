@@ -86,7 +86,8 @@ def calculate_vertical_diffusivity(vertical_grid, diffusion, nutrients, d3state,
 
     # LOOP OVER BFM STATE VAR'S
     for M in range(0,num_d3_box_states):
-
+    # for M in range(0,num_d3_box_states-1):
+    
         # ZEROING
         bfm_state_var.surface_flux = 0.
         bfm_state_var.bottom_flux = 0.

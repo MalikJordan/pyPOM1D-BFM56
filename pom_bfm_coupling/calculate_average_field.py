@@ -71,6 +71,47 @@ def chl_average_field(chl_ave,chlorophylla,case):
     return chl_ave 
 
 
+def dic_average_field(dic_ave,o3c,density,case):
+
+    dic = o3c/12/density*1000
+    if case == 'Initialize':
+        dic_ave.single_day_ave[:] = 0
+        # d3ave.count = d3ave.count + 1
+
+    elif case == 'Accumulate':
+        dic_ave.single_day_ave[:] = dic_ave.single_day_ave[:] + dic[:]
+        # d3ave.count = d3ave.count + 1
+
+    elif case == 'Mean':
+        dic_ave.single_day_ave[:] = dic_ave.single_day_ave[:] + dic[:]
+        # dic_ave.single_day_ave[:] = dic_ave.single_day_ave[:]
+
+        # dic_ave.single_day_ave[:] = dic_ave.single_day_ave[:]/dic_ave.count
+        # dic_ave.single_day_ave[:] = dic_ave.single_day_ave[:]/(dic_ave.count+1)
+        # dic_ave.daily_ave[:,dic_ave.day] = dic_ave.single_day_ave[:]
+        dic_ave.daily_ave[:,dic_ave.day] = dic_ave.single_day_ave[:]/dic_ave.count
+        dic_ave.monthly_ave[:,dic_ave.month] = dic_ave.monthly_ave[:,dic_ave.month] + dic_ave.daily_ave[:,dic_ave.day]
+        if (dic_ave.day != 0) & ((dic_ave.day+1) % 30 == 0):
+            # should actually be when (d3ave.day+1) % 30 == 0 because of python '0 first' indexing
+            dic_ave.monthly_ave[:,dic_ave.month] = dic_ave.monthly_ave[:,dic_ave.month]/30
+            dic_ave.month += 1
+
+        dic_ave.day = dic_ave.day + 1
+        dic_ave.single_day_ave[:] = 0
+        # dic_ave.single_day_ave[:] = dic[:]
+    
+    elif case == 'Reset':
+        # Output writing and print functions will go here
+        dic_ave.count = 0
+        dic_ave.day = 0
+        dic_ave.month = 0
+        dic_ave.single_day_ave[:] = 0
+        dic_ave.daily_ave[:] = 0
+        dic_ave.monthly_ave[:,:] = 0
+        
+    return dic_ave 
+
+
 def npp_average_field(npp_ave,net_primary_production,case):
     if case == 'Initialize':
         npp_ave.single_day_ave[:] = 0

@@ -1,5 +1,5 @@
 import numpy as np
-from pom.constants import num_boxes
+# from pom.constants import num_boxes
 from bfm.bfm56.Functions.other_functions import eTq_vector
 from inputs import params_POMBFM
 from inputs.namelist_input_data import calcpelbacteria
@@ -7,6 +7,8 @@ from inputs.namelist_input_data import calcpelbacteria
 def pel_chem_eqns(bfm_phys_vars, pel_chem_parameters, environmental_parameters, constant_parameters, del_z, temper, d3state, flPTn6r):
     """ calculates the non-living equations for DOM, POM, and nutrients """
     
+    num_boxes = d3state.shape[0]
+
     # State variables
     o2o = d3state[:,0]              # Dissolved oxygen (mg O_2 m^-3)
     n3n = d3state[:,2]              # Nitrate (mmol N m^-3)
@@ -48,7 +50,7 @@ def pel_chem_eqns(bfm_phys_vars, pel_chem_parameters, environmental_parameters, 
     dr6sdt_rmn_n5s = pel_chem_parameters["lambda_srmn"]*fTr6*r6s
     # dr6sdt_rmn_n5s = np.zeros(num_boxes)
 
-    if not calcpelbacteria:
+    if not pel_chem_parameters["calc_bacteria"]:
         # Constant organic matter remineralization from PelChem.F90
         # bacprof = (1/np.log(params_POMBFM.h))*(np.log(params_POMBFM.h) - del_z)
         p_sR6O3 = 0.1

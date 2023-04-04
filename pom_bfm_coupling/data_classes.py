@@ -20,27 +20,44 @@ class BfmStateVariableData:
         self.bottom_flux = bottom_flux
 
 
+# class BfmPhysicalVariableData:
+#     # def __init__(self, temperature=np.zeros(vertical_layers), salinity=np.zeros(vertical_layers), density=np.zeros(vertical_layers), 
+#     #              suspended_matter=np.zeros(vertical_layers-1), depth=np.zeros(vertical_layers), irradiance=np.zeros(vertical_layers-1), 
+#     #              vertical_extinction=np.zeros(vertical_layers-1), wind=0, wgen=np.zeros(vertical_layers), weddy=np.zeros(vertical_layers)):
+#     def __init__(self, temperature=np.zeros(num_boxes), salinity=np.zeros(num_boxes), density=np.zeros(num_boxes), 
+#                  suspended_matter=np.zeros(num_boxes), depth=np.zeros(num_boxes), irradiance=np.zeros(num_boxes), 
+#                  vertical_extinction=np.zeros(num_boxes), wind=0, wgen=np.zeros(num_boxes), weddy=np.zeros(num_boxes),
+#                  detritus_sedimentation=np.zeros(num_boxes), phyto_sedimentation=np.zeros((num_boxes,4)), pH=0):
+#         self.temperature = temperature
+#         self.salinity = salinity
+#         self.density = density
+#         self.suspended_matter = suspended_matter
+#         self.depth = depth
+#         self.irradiance = irradiance
+#         self.vertical_extinction = vertical_extinction
+#         self.wind = wind
+#         self.wgen = wgen
+#         self.weddy = weddy
+#         self.detritus_sedimentation = detritus_sedimentation
+#         self.phyto_sedimentation = phyto_sedimentation
+#         self.pH = pH
+
+
 class BfmPhysicalVariableData:
-    # def __init__(self, temperature=np.zeros(vertical_layers), salinity=np.zeros(vertical_layers), density=np.zeros(vertical_layers), 
-    #              suspended_matter=np.zeros(vertical_layers-1), depth=np.zeros(vertical_layers), irradiance=np.zeros(vertical_layers-1), 
-    #              vertical_extinction=np.zeros(vertical_layers-1), wind=0, wgen=np.zeros(vertical_layers), weddy=np.zeros(vertical_layers)):
-    def __init__(self, temperature=np.zeros(num_boxes), salinity=np.zeros(num_boxes), density=np.zeros(num_boxes), 
-                 suspended_matter=np.zeros(num_boxes), depth=np.zeros(num_boxes), irradiance=np.zeros(num_boxes), 
-                 vertical_extinction=np.zeros(num_boxes), wind=0, wgen=np.zeros(num_boxes), weddy=np.zeros(num_boxes),
-                 detritus_sedimentation=np.zeros(num_boxes), phyto_sedimentation=np.zeros((num_boxes,4)), pH=0):
-        self.temperature = temperature
-        self.salinity = salinity
-        self.density = density
-        self.suspended_matter = suspended_matter
-        self.depth = depth
-        self.irradiance = irradiance
-        self.vertical_extinction = vertical_extinction
-        self.wind = wind
-        self.wgen = wgen
-        self.weddy = weddy
-        self.detritus_sedimentation = detritus_sedimentation
-        self.phyto_sedimentation = phyto_sedimentation
-        self.pH = pH
+    def __init__(self, z):
+        self.temperature = np.zeros(z)
+        self.salinity = np.zeros(z)
+        self.density = np.zeros(z)
+        self.suspended_matter = np.zeros(z)
+        self.depth = np.zeros(z)
+        self.irradiance = np.zeros(z)
+        self.vertical_extinction = np.zeros(z)
+        self.wind = 0.
+        self.wgen = np.zeros(z)
+        self.weddy = np.zeros(z)
+        self.detritus_sedimentation = np.zeros(z)
+        self.phyto_sedimentation = np.zeros((z,4))
+        self.pH = 0
 
 
 class NutrientData:
@@ -66,6 +83,15 @@ class D3stateAverageData:
 
 
 class ChlAverageData:
+    def __init__(self,count=0,day=0,month=0,single_day_ave=np.zeros(num_boxes),daily_ave=np.zeros((num_boxes,idays)),monthly_ave=np.zeros((num_boxes,months_needed))):
+        self.count = count
+        self.day = day
+        self.month = month
+        self.single_day_ave = single_day_ave
+        self.daily_ave = daily_ave
+        self.monthly_ave = monthly_ave
+
+class DicAverageData:
     def __init__(self,count=0,day=0,month=0,single_day_ave=np.zeros(num_boxes),daily_ave=np.zeros((num_boxes,idays)),monthly_ave=np.zeros((num_boxes,months_needed))):
         self.count = count
         self.day = day

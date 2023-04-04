@@ -153,11 +153,11 @@ def create_kinetic_energy_profile(vertical_grid, diffusion, temperature, salinit
     #     TEMP2[i] = (0.00821*pressure)
     #     TEMP3[i] = (1.-0.40 * (pressure/CC[i]**2))
     #
-    for i in range(0, vertical_layers - 1):
-        CC[i] = CC[i] * (1. - TEMP1[i] * (TEMP2[i] + 15. * 1.E-9 * pressure ** 2) * TEMP3[i]) ** (-0.5)
-        pressure = -gravity * 1.025 * vertical_grid.vertical_coordinates_staggered[i] * params_POMBFM.h * .1
-        CC[i] = 1449.1 + .00821 * pressure + 4.55 * temperature.current[i] - .045 * temperature.current[i] ** 2 + 1.34 * (salinity.current[i] - 35.)
-        CC[i] = CC[i] / np.sqrt((1. - .01642 * pressure / CC[i]) * (1. - 0.40 * pressure / CC[i] ** 2))
+    # for i in range(0, vertical_layers - 1):
+    #     CC[i] = CC[i] * (1. - TEMP1[i] * (TEMP2[i] + 15. * 1.E-9 * pressure ** 2) * TEMP3[i]) ** (-0.5)
+    #     pressure = -gravity * 1.025 * vertical_grid.vertical_coordinates_staggered[i] * params_POMBFM.h * .1
+    #     CC[i] = 1449.1 + .00821 * pressure + 4.55 * temperature.current[i] - .045 * temperature.current[i] ** 2 + 1.34 * (salinity.current[i] - 35.)
+    #     CC[i] = CC[i] / np.sqrt((1. - .01642 * pressure / CC[i]) * (1. - 0.40 * pressure / CC[i] ** 2))
 
     for i in range(1, vertical_layers - 1):
         kinetic_energy.backward[i] = np.abs(kinetic_energy.backward[i])

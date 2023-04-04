@@ -4,7 +4,7 @@ from inputs import params_POMBFM
 from bfm.bfm56.BFM56_rate_eqns import bfm56_rate_eqns
 from pom_bfm_coupling.calculations import calculate_vertical_diffusivity
 from pom_bfm_coupling.initialize_variables import set_initial_conditions
-from pom_bfm_coupling.calculate_average_field import d3state_average_field, chl_average_field, npp_average_field
+from pom_bfm_coupling.calculate_average_field import d3state_average_field, chl_average_field, dic_average_field, npp_average_field
 from pom.constants import current_path, num_boxes
 import json
 
@@ -53,7 +53,7 @@ def pom_to_bfm(bfm_phys_vars, vertical_grid, temperature, salinity, inorganic_su
     return bfm_phys_vars
 
 
-def pom_bfm_1d(i, vertical_grid, time, diffusion, nutrients, bfm_phys_vars, d3state, d3stateb, d3ave, chl_ave, npp_ave):
+def pom_bfm_1d(i, vertical_grid, time, diffusion, nutrients, bfm_phys_vars, d3state, d3stateb, d3ave, chl_ave, dic_ave, npp_ave, multiplier):
 
     num_boxes = vertical_layers - 1
     bfm_rates = np.zeros((num_boxes,50))
@@ -62,12 +62,13 @@ def pom_bfm_1d(i, vertical_grid, time, diffusion, nutrients, bfm_phys_vars, d3st
     do3cdt_air_sea_flux = np.zeros(num_boxes)
     
     # bfm_rates, dOdt_wind, do3cdt_air_sea_flux, chlorophylla, net_primary_production = bfm50_rate_eqns(bfm_phys_vars, time, d3state, seasonal_cycle=False)
-    bfm_rates, bfm_phys_vars, dOdt_wind, do3cdt_air_sea_flux, chlorophylla, net_primary_production = bfm56_rate_eqns(i, bfm_phys_vars, time, d3state, seasonal_cycle=False)
-    if (i+1) % 5000 == 0:
-        x=1
+    bfm_rates, bfm_phys_vars, dOdt_wind, do3cdt_air_sea_flux, chlorophylla, net_primary_production = bfm56_rate_eqns(i, time, d3state, bfm_phys_vars, multiplier, seasonal_cycle=False)
+    # if (i+1) % 5000 == 0:
+    #     x=1
     d3state, d3stateb = calculate_vertical_diffusivity(vertical_grid, diffusion, nutrients, d3state, d3stateb, bfm_rates, bfm_phys_vars, dOdt_wind, do3cdt_air_sea_flux)
     d3ave.count += 1
     chl_ave.count += 1
+    dic_ave.count += 1
     npp_ave.count += 1
 
     # if i == 0:
@@ -76,23 +77,32 @@ def pom_bfm_1d(i, vertical_grid, time, diffusion, nutrients, bfm_phys_vars, d3st
 
     # if d3ave.count == 0:
     #     d3ave = calculate_average_field(d3ave,d3state,'Initialize')
-    if (d3ave.count > 0) and (d3ave.count < seconds_per_day/params_POMBFM.dti):
+    if (d3ave.count > 0) and (d3ave.count < (seconds_per_day/params_POMBFM.dti)):
         d3ave = d3state_average_field(d3ave,d3state,'Accumulate')
         chl_ave = chl_average_field(chl_ave,chlorophylla,'Accumulate')
+        dic_ave = dic_average_field(dic_ave,d3state[:,48],bfm_phys_vars.density,'Accumulate')
         npp_ave = npp_average_field(npp_ave,net_primary_production,'Accumulate')
-    elif d3ave.count == seconds_per_day/params_POMBFM.dti:
+    elif d3ave.count == (seconds_per_day/params_POMBFM.dti):
         d3ave = d3state_average_field(d3ave,d3state,'Mean')
         chl_ave = chl_average_field(chl_ave,chlorophylla,'Mean')
+        dic_ave = dic_average_field(dic_ave,d3state[:,48],bfm_phys_vars.density,'Mean')
         npp_ave = npp_average_field(npp_ave,net_primary_production,'Mean')
         
         # Reset counter for next day
         d3ave.count = 0
         chl_ave.count = 0
+        dic_ave.count = 0
         npp_ave.count = 0
     # elif d3ave.day == params_POMBFM.idays:
     #     d3ave = calculate_average_field(d3ave,d3state,'Reset')
+    # if dic_ave.month == 1:
+    #     print(dic_ave.monthly_ave[:,0])
+    # d3ave.count += 1
+    # chl_ave.count += 1
+    # dic_ave.count += 1
+    # npp_ave.count += 1
 
-    return d3state, d3stateb, d3ave, chl_ave, npp_ave
+    return d3state, d3stateb, d3ave, chl_ave, dic_ave, npp_ave
 
 
 def calculate_vertical_extinction(bfm_phys_vars, d3state): #, group):

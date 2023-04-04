@@ -7,7 +7,7 @@ alat = 45.0         # latitude [degrees]
 idiagn = 1          # switch between prognostic (idiagn = 0) and diagnostic (idiagn = 1) mode
 # idays = 3600        # length of run [days]
 idays = 730
-# idays = 30
+# idays = 35
 smoth = 0.1         # parameter for hasselin filter
 ihotst = 0          # switch for cold start (ihotst = 0) and hot start, ie reading restart (ihotst = 1)
 kl1 = 2             # surface logarithmic layers distribution

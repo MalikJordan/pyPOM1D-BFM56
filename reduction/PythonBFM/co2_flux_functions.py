@@ -1,8 +1,8 @@
 import numpy as np
-from bfm.bfm56.Functions.seasonal_cycling_functions import calculate_density
+from reduction.PythonBFM.seasonal_cycling_functions import calculate_density
 
-# def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_parameters, conc, temper, wind, salt):
-def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_parameters, conc, temper, wind, salt, rho, del_z, pH):
+def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_parameters, conc, temper, wind, salt):
+# def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_parameters, conc, temper, wind, salt, rho, pH):
     """ calculates the air-sea flux of co2 """
     
     # Species concentrations
@@ -23,9 +23,8 @@ def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_p
     bt = 2.5*(0.5246 + 1.6256e-2*temper + 4.9946e-4*(temper**2))
 
     # Calculate wind dependency + Chemical enhancement including conversion cm/hr => m/s
-    # ken = (bt + co2_flux_parameters["d"]*(wind**2))*np.sqrt(schmidt_ratio_o3c)*constant_parameters["cm2m"]*constant_parameters["hours_per_day"]/constant_parameters["sec_per_day"]
     ken = (bt + co2_flux_parameters["d"]*(wind**2))*np.sqrt(schmidt_ratio_o3c)*constant_parameters["cm2m"]*constant_parameters["hours_per_day"]
-
+    
     # K0, solubility of co2 in the water (K Henry) from Weiss 1974; K0 = [co2]/pco2 [mol kg-1 atm-1]
     tk = (temper + constant_parameters["c_to_kelvin"])
     tk_100 = tk/100.0
@@ -35,16 +34,16 @@ def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_p
     pco2_air = co2_flux_parameters["atm_co2_0"]
 
     # get density [kg m^-3]
-    # rho = calculate_density(temper,salt,environmental_parameters["del_z"])
+    rho = calculate_density(temper,salt,environmental_parameters["del_z"])
 
-    # # initialize ph if it doesn't already have a value
-    # try:
-    #     pH
-    # except NameError:
-    #     pH = co2_flux_parameters["ph_initial"]
+    # initialize ph if it doesn't already have a value
+    try:
+        pH
+    except NameError:
+        pH = co2_flux_parameters["ph_initial"]
 
     # calculate all constants needed to convert between various measured carbon species
-    tk_inv = 1.0/tk
+        tk_inv = 1.0/tk
     tk_log = np.log(tk)
     salt_sqrt = np.sqrt(salt)
     
@@ -121,7 +120,6 @@ def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_p
     kb = np.exp(lnK)
 
     # calculate [H+] total when DIC and TA are known
-    # small_interval = (pH>1.0 and pH<9.0)
     small_interval = (pH>4.0 and pH<9.0)
     if small_interval:
         h1 = 10.0**(-(pH + co2_flux_parameters["m2phdelt"]))
@@ -137,9 +135,7 @@ def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_p
     co2 = ldic*h_plus2/(h_plus2 + k1*h_plus + k1*k2)
     pco2_sea = co2/k0
     pH = -np.log10(h_plus)
-    hco3 = k1*co2/h_plus
-    co3 = k2*hco3/h_plus
-        
+       
     # convert partial pressure of oceanic CO2 to uatm
     pco2_sea = pco2_sea*constant_parameters["uatm_per_atm"]
     
@@ -147,10 +143,9 @@ def calculate_co2_flux(co2_flux_parameters, environmental_parameters, constant_p
     do3cdt_air_sea_flux = ken*(pco2_air - pco2_sea)*k0*rho/1000.0
     
     # convert flux to units of mg C m^-3 s^-1
-    # do3cdt_air_sea_flux = do3cdt_air_sea_flux/constant_parameters["omega_c"]/environmental_parameters["del_z"]
-    do3cdt_air_sea_flux = do3cdt_air_sea_flux/constant_parameters["omega_c"]/del_z
+    do3cdt_air_sea_flux = do3cdt_air_sea_flux/constant_parameters["omega_c"]/environmental_parameters["del_z"]
 
-    return do3cdt_air_sea_flux, pH
+    return do3cdt_air_sea_flux
     
 def calculate_Hplus(pH, k1, k2, k1p, k2p, k3p, ksi, kw, ks, kf, kb, bt, st, ft, pt, sit, ldic, alk):
     """ This function expresses total alkalinity (TA) as a function of DIC, 
@@ -266,6 +261,7 @@ def find_roots_of_f_TA(x1, x2, xacc, maxit, k1, k2, k1p, k2p, k3p, ksi, kw, ks, 
         if not ready and np.isnan(drtsafe2):
             drtsafe2 = 10**(8.12)     # pH = log10(drtsafe2) set to initial value provided in co2_flux_parameters
             break
+            
     if j>maxit:
         error = 2
     
