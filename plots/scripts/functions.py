@@ -202,7 +202,7 @@ def plot_fields(check,comp,model_name):
     # Titles
     title_check = ['(a) Chl-a','(b) Oxygen','(c) Nitrate','(d) Phoshate','(e) PON','(f) NPP','(g) DIC']
     title_comp = ['(h) Chl-a','(i) Oxygen','(j) Nitrate','(k) Phoshate','(l) PON','(m) NPP','(n) DIC']
-    title = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)','(h)','(i)','(j)','(k)','(l)','(m)','(n)']
+    title = ['(a) Chl-a','(b) Oxygen','(c) Nitrate','(d) Phoshate','(e) Chl-a','(f) Oxygen','(g) Nitrate','(h) Phoshate','(i) PON','(j) NPP','(k) DIC','(l) PON','(m) NPP','(n) DIC']
     # ---------------------------------------------------------------------------------------------------------------------------------
     # Colorbar Limits
     clow   = [0,180,0,0,0.1,0,30]
@@ -299,5 +299,51 @@ def plot_fields(check,comp,model_name):
     plt.tight_layout(h_pad=0.75, w_pad=0.75)
 
     fig_name = 'plots/figures/' + model_name + '_fields_2.jpg'
+    plt.savefig(fig_name)
+
+    # ---------------------------------------------------------------------------------------------------------------------------------
+    # Field Plots - Style 3    
+    fig,axes = plt.subplots(4,4,figsize=[16,15])
+    for i in range(0,7):
+        plt.subplot(4,4,i+1)
+        plt.imshow(check[i,:,:],extent=[0,12,150,0],aspect='auto',cmap='jet')
+        ax = plt.gca()
+        plt.xticks([0.5,2.5,4.5,6.5,8.5,10.5], ['J','M','M','J','S','N'])
+        plt.xlabel('Month',fontsize=14)
+        if i%4 == 0:
+            plt.yticks([0,50,100,150])
+            plt.ylabel('Depth (m)',fontsize=14)
+        else:
+            plt.yticks([0,50,100,150],[])
+        plt.title(title_check[i],fontsize=20)
+        plt.clim(clow[i],chigh[i])
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(cax=cax)
+
+    for i in range(7,14):
+        plt.subplot(4,4,i+2)
+        plt.imshow(comp[i-7,:,:],extent=[0,12,150,0],aspect='auto',cmap='jet')
+        ax = plt.gca()
+        plt.xticks([0.5,2.5,4.5,6.5,8.5,10.5], ['J','M','M','J','S','N'])
+        plt.xlabel('Month',fontsize=14)
+        plt.yticks([0,50,100,150])
+        if i%4 == 3:
+            plt.yticks([0,50,100,150])
+            plt.ylabel('Depth (m)',fontsize=14)
+        else:
+            plt.yticks([0,50,100,150],[])
+        plt.title(title_comp[i-7],fontsize=20)
+        plt.clim(clow[i-7],chigh[i-7]) 
+        divider = make_axes_locatable(ax)
+        cax = divider.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(cax=cax)   
+
+    fig.delaxes(axes[1,3])
+    fig.delaxes(axes[3,3])
+
+    plt.tight_layout(h_pad=0.75, w_pad=0.75)
+
+    fig_name = 'plots/figures/' + model_name + '_fields_3.jpg'
     plt.savefig(fig_name)
 
