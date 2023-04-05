@@ -23,11 +23,16 @@ plot_error(nrmse_pyPOM21,model_name,chl_removed=True)
 # Print Max NRMSE
 species = ['Chl-a','Oxygen','Nitrate','Phosphate','PON','NPP','DIC']
 maxes = np.max(nrmse_pyPOM21,axis=1)
+avgs = np.average(nrmse_pyPOM21,axis=1)
 
 print('Max NRMSE - pyPOM21 vs pyPOM50')
 for i in range(0,7):
     print(species[i],' - ',maxes[i])
-
+print()
+print('Average NRMSE - pyPOM21 vs pyPOM50')
+for i in range(0,7):
+    print(species[i],' - ',avgs[i])
+print()
 
 # ---------------------------------------------------------------------------------------------------------------------------------
 # Data
@@ -51,7 +56,13 @@ plot_error(nrmse_pyPOM21_35,model_name='pyPOM1D-BFM21_35',chl_removed=True)
 # Print Max NRMSE
 species = ['Chl-a','Oxygen','Nitrate','Phosphate','PON','NPP','DIC']
 maxes = np.max(nrmse_pyPOM21_35,axis=1)
+avgs = np.average(nrmse_pyPOM21_35,axis=1)
 
 print('Max NRMSE - pyPOM21 vs pyPOM35')
 for i in range(0,7):
     print(species[i],' - ',maxes[i])
+print()
+print('Average NRMSE - pyPOM21 vs pyPOM35')
+for i in range(0,7):
+    print(species[i],' - ',avgs[i])
+print()
